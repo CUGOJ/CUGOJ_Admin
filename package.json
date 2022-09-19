@@ -11,7 +11,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@types/js-cookie": "^3.0.2",
+    "axios": "^0.27.2",
     "vue": "^3.2.38",
+    "vue-cookies": "^1.8.1",
+    "vue-cookies-ts": "^1.5.19",
     "vue-router": "^4.1.5"
   },
   "devDependencies": {
