@@ -8,13 +8,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     CoreDeploy: typeof import('./src/components/CoreDeploy.vue')['default']
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     HostList: typeof import('./src/components/HostList.vue')['default']
-    IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
-    IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
-    IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
-    IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
-    IconTooling: typeof import('./src/components/icons/IconTooling.vue')['default']
     MysqlDeploy: typeof import('./src/components/MysqlDeploy.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']
@@ -41,7 +35,5 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     ServiceList: typeof import('./src/components/ServiceList.vue')['default']
     SysInfo: typeof import('./src/components/SysInfo.vue')['default']
-    TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
-    WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
   }
 }

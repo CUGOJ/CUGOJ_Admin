@@ -115,7 +115,7 @@ const createColums = () => {
                         onClick: () => {
                             loadService(row.serviceID)
                         },
-                        disabled: user !== 'admin'
+                        disabled: user !== 'admin' && user !== row.env
                     },
                     {
                         default: () => "查看配置"

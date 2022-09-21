@@ -13,7 +13,7 @@ axios.interceptors.response.use(
     }
 )
 
-axios.defaults.baseURL = 'https://localhost:7052';
+axios.defaults.baseURL = 'http://localhost:5000';
 
 export function get(url: string, params: {} | undefined) {
     return new Promise((resolve, reject) => {
