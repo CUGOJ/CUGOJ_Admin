@@ -9,14 +9,27 @@ namespace CUGOJ.CUGOJ_Admin.Pages.Auth
         readonly IHttpContextAccessor _httpContextAccessor;
         readonly RoleManager<IdentityRole> _roleManager;
         readonly SignInManager<IdentityUser> _signInManager;
-        
-        public AuthHelperService(IServiceProvider provider,IHttpContextAccessor httpContextAccessor)
+
+        public AuthHelperService(IServiceProvider provider, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = provider.CreateScope().ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
             _roleManager = provider.CreateScope().ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             _signInManager = provider.CreateScope().ServiceProvider.GetRequiredService<SignInManager<IdentityUser>>();
             _httpContextAccessor = httpContextAccessor;
         }
+
+        public async Task<bool> InitAdmin()
+        {
+            if ((await _userManager.FindByNameAsync("Admin")) == null)
+            {
+                var user = new IdentityUser { UserName = "Admin", Email = "Admin" };
+                await _userManager.CreateAsync(user, "CUGOJcugoj_01");
+                user = await _userManager.FindByNameAsync("Admin");
+                await _userManager.ConfirmEmailAsync(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
+            }
+            return true;
+        }
+
         public async Task<bool> IsAdmin()
         {
             if (_httpContextAccessor.HttpContext == null) return false;
@@ -29,7 +42,7 @@ namespace CUGOJ.CUGOJ_Admin.Pages.Auth
         public async Task<bool> AddAdmin(string? username = null)
         {
             IdentityUser? user;
-            if(username == null)
+            if (username == null)
             {
                 if (_httpContextAccessor.HttpContext == null) return false;
                 user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
@@ -39,26 +52,26 @@ namespace CUGOJ.CUGOJ_Admin.Pages.Auth
                 user = await _userManager.FindByNameAsync(username);
             }
             if (user == null) return false;
-            if(await _roleManager.FindByNameAsync("Admin") == null)
+            if (await _roleManager.FindByNameAsync("Admin") == null)
             {
                 await _roleManager.CreateAsync(new IdentityRole("Admin"));
             }
             await _userManager.AddToRoleAsync(user, "Admin");
             return true;
         }
-        
-        public async Task<string?> ChangePassword(string oldPassword,string newPassword)
+
+        public async Task<string?> ChangePassword(string oldPassword, string newPassword)
         {
             var user = await GetUser();
             if (user == null) return "请先登录";
             var res = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
-            if(!res.Succeeded)
+            if (!res.Succeeded)
             {
                 return res.Errors.First().Description;
             }
             return null;
         }
-        public async Task<IdentityUser?>GetBaseUser()
+        public async Task<IdentityUser?> GetBaseUser()
         {
             var user = await GetUser();
             if (user == null) return null;
@@ -82,13 +95,13 @@ namespace CUGOJ.CUGOJ_Admin.Pages.Auth
         {
             return await _userManager.FindByNameAsync(username);
         }
-        public async Task<string?>GetUsername()
+        public async Task<string?> GetUsername()
         {
             var user = await GetUser();
             if (user == null) return null;
             return user.UserName;
         }
-        public async Task<string?>GetUserId()
+        public async Task<string?> GetUserId()
         {
             var user = await GetUser();
             if (user == null) return null;
