@@ -1,0 +1,109 @@
+﻿@page "/Config"
+@using CUGOJ.CUGOJ_Admin.Data
+@using Microsoft.AspNetCore.Identity
+@inject AuthHelperService AuthHelper
+@inject ToastService ToastService
+<Button IsAsync OnClick="@(async()=>await AuthHelper.AddAdmin())">申请Admin权限</Button>
+没有找到自己环境的配置? 点击→ <Button Color="Color.Primary" OnClick="@AsyncConfigs">同步环境配置</Button>
+<Table TItem="ConfigModel" Items="ConfigList" IsStriped IsBordered style="margin-top:10px">
+    <TableColumns>
+        <TableColumn @bind-Field="@context.Env" Text="环境名" />
+        <TableColumn @bind-Field="@context.Env" Text="操作">
+            <Template Context="value">
+                <div class="btn-group" role="group">
+                     <Button Size="Size.Small" Color="Color.Primary" IsAsync OnClick="@(async e => await OpenModal(false,value.Row.Env))">查看配置</Button>
+                    @if (@value.Row.HasPermission)
+                    {
+                        <Button Size="Size.Small" Color="Color.Warning" IsAsync OnClick="@(async e => await OpenModal(true,value.Row.Env))">修改配置</Button>
+                    }
+                </div>
+               
+            </Template>
+        </TableColumn>
+    </TableColumns>
+</Table>
+<Modal @ref="ViewModal">
+    <ModalDialog Size="Size.Medium" IsCentered="true" Title="查看配置" ShowFooter="@false">
+        <BodyTemplate>
+            <Table TItem="ConfigItem" Items="ConfigItems" IsStriped IsBordered style="margin-top:10px">
+                <TableColumns>
+                    <TableColumn @bind-Field="@context.Key" Text="Key" />
+                    <TableColumn @bind-Field="@context.Value" Text="Value"/>
+                    <TableColumn @bind-Field="@context.IsInherited" Text="备注">
+                        <Template Context="value">
+                            @if(value.Value)
+                            {
+                                <Tag Color="Color.Primary">继承自default</Tag>
+                            }
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </BodyTemplate>
+    </ModalDialog>
+</Modal>
+<Modal @ref="EditModal">
+    <ModalDialog Size="Size.Medium" IsCentered="true" Title="修改配置" ShowFooter="@false">
+        <BodyTemplate>
+            <Button Color="Color.Success" IsAsync OnClick="@AddConfig">增加配置项</Button>
+            <Table TItem="ConfigItem" Items="ConfigItems" IsStriped IsBordered style="margin-top:10px">
+                <TableColumns>
+                    <TableColumn @bind-Field="@context.Key" Text="Key" />
+                    <TableColumn @bind-Field="@context.Value" Text="Value" />
+                    <TableColumn @bind-Field="@context.Key" Text="备注">
+                        <Template Context="value">
+                            @if (value.Row.IsInherited)
+                            {
+                                <Tag Color="Color.Primary">继承自default</Tag>
+                            }
+                        </Template>
+                    </TableColumn>
+                    <TableColumn @bind-Field="@context.IsInherited" Text="操作">
+                        <Template Context="value">
+                            <div class="btn-group" role="group">
+                                <Button Size="Size.Small" Color="Color.Primary" IsAsync OnClick="@(async e => await EditConfigItem(value.Row.Key))">编辑</Button>
+                                @if(value.Value)
+                                {
+                                 <PopConfirmButton Size="Size.Small" Color="Color.Danger" Content="确认删除环境吗？该操作不可逆" OnConfirm="async ()=> DeleteConfig(value.Row.Key)" IsAsync="true" ConfirmButtonColor="Color.Danger">删除</PopConfirmButton>
+                                }
+                            </div>
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+            <div class="row mt-3">
+                <div class="col">
+                    <Button style="margin:0 auto;display:block;" Color="Color.Primary" IsAsync OnClick="@(async ()=>await SaveEdit())">保存修改</Button>
+                </div>
+                <div class="col">
+                    <Button style="margin:0 auto;display:block;" Color="Color.Secondary" OnClick="async e=>await EditModal!.Close()">取消</Button>
+                </div>
+            </div>
+        </BodyTemplate>
+    </ModalDialog>
+</Modal>
+<Modal @ref="EditKVModal">
+    <ModalDialog Size="Size.Small" IsCentered="true" Title="修改配置值" ShowCloseButton=false>
+        <BodyTemplate>
+            @if (editingConfig != null)
+            {
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <BootstrapInput @bind-Value="@editingConfig.Key" PlaceHolder="配置KEY"/>
+                    </div>
+                    <div class="col-6">
+                        <BootstrapInput @bind-Value="@editingConfig.Value" PlaceHolder="配置值"/>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <Button style="margin:0 auto;display:block;" Color="Color.Primary" IsAsync OnClick="EditEnd">修改</Button>
+                    </div>
+                    <div class="col">
+                        <Button style="margin:0 auto;display:block;" Color="Color.Secondary" OnClick="async e=>await EditKVModal!.Close()">取消</Button>
+                    </div>
+                </div>
+            }
+        </BodyTemplate>
+    </ModalDialog>
+</Modal>

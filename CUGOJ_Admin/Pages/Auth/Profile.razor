@@ -1,0 +1,50 @@
+﻿@page "/Profile"
+@using Microsoft.AspNetCore.Identity
+@inject ToastService ToastService
+@inject AuthHelperService AuthHelper
+@inject UserManager<IdentityUser> UserManager
+@inject NavigationManager NavigationManager
+<div class="row">
+    <div class="col-6">
+        <BootstrapInput type="password" @bind-Value="oldPassword" PlaceHolder="请输入旧密码"></BootstrapInput>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <BootstrapInput type="password" @bind-Value="newPassword" PlaceHolder="请输入新密码"></BootstrapInput>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <BootstrapInput type="password" @bind-Value="confirmPassword" PlaceHolder="请确认新密码"></BootstrapInput>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+    <Button IsAsync OnClick="OnChangePassword">更改密码</Button>
+    </div>
+</div>
+
+@code {
+    string oldPassword = "";
+    string newPassword = "";
+    string confirmPassword = "";
+    async Task OnChangePassword()
+    {
+        if (newPassword != confirmPassword)
+        {
+            await ToastService.Error("两次输入的密码不一致");
+            return;
+        }
+        var res = await AuthHelper.ChangePassword(oldPassword, newPassword);
+        if (res != null)
+        {
+            await ToastService.Error(res);
+        }
+        else
+        {
+            await ToastService.Success("更改密码成功");
+            NavigationManager.NavigateTo("/Login");
+        }
+    }
+}

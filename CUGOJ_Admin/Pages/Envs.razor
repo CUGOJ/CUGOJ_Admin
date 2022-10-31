@@ -1,0 +1,62 @@
+﻿@page "/Envs"
+@using CUGOJ.CUGOJ_Admin.Data
+@using Microsoft.AspNetCore.Identity
+@inject AuthHelperService AuthHelper
+@inject ToastService ToastService
+<Button Color="Color.Primary" OnClick="@(async e=> await AddEnvModal!.Toggle())">添加环境</Button>
+<Table TItem="EnvModel" Items="EnvList" IsStriped IsBordered style="margin-top:10px">
+    <TableColumns>
+        <TableColumn @bind-Field="@context.Name" Text="环境名" />
+        <TableColumn @bind-Field="@context.HasPermission" Text="是否有权操作" />
+        <TableColumn @bind-Field="@context.Id" Text="操作">
+            <Template Context="value">
+                @if (@value.Row.HasPermission)
+                {
+                    <div class="btn-group" role="group">
+                        <Button Size="Size.Small" Color="Color.Primary" IsAsync OnClick="@(async e => await OpenModal(value.Row.Id))">授权</Button>
+                        <PopConfirmButton Size="Size.Small" Color="Color.Danger" Content="确认删除环境吗？该操作不可逆" OnConfirm="async ()=>await DeleteEnv(value.Row.Id)" IsAsync="true" ConfirmButtonColor="Color.Danger">删除</PopConfirmButton>
+                    </div>
+                }
+            </Template>
+        </TableColumn>
+    </TableColumns>
+</Table>
+<Modal @ref="AddPermissionModal">
+    <ModalDialog Size="Size.Medium" IsCentered="true" Title="增加授权" ShowFooter="@false">
+        <BodyTemplate>
+            <div class="row mt-3">
+                <div class="col-10 offset-1">
+                    <BootstrapInput @bind-Value="@NewPermissionUserName" Placeholder="请输入用户名" />
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+                    <Button style="margin:0 auto;display:block;" Color="Color.Danger" IsAsync OnClick="AddPermission">确认授权</Button>
+                </div>
+                <div class="col">
+                    <Button style="margin:0 auto;display:block;" Color="Color.Secondary" OnClick="async e=>await AddPermissionModal!.Close()">取消</Button>
+                </div>
+            </div>
+        </BodyTemplate>
+    </ModalDialog>
+</Modal>
+<Modal @ref="AddEnvModal">
+    <ModalDialog Size="Size.Medium" IsCentered="true" Title="添加环境" ShowFooter="@false">
+        <BodyTemplate>
+            <div class="row mt-3">
+                <div class="col-10 offset-1">
+                    <BootstrapInput @bind-Value="@NewEnvName" PlaceHolder="请输入新环境名" />
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col">
+                    <Button style="margin:0 auto;display:block;" Color="Color.Primary" IsAsync OnClick="AddEnv">确认增加</Button>
+                </div>
+                <div class="col">
+                    <Button style="margin:0 auto;display:block;" Color="Color.Secondary" OnClick="async e=>await AddEnvModal!.Close()">取消</Button>
+                </div>
+            </div>
+        </BodyTemplate>
+    </ModalDialog>
+</Modal>

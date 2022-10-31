@@ -1,0 +1,79 @@
+﻿@page "/Login"
+@using Microsoft.AspNetCore.Identity
+@using System.Web;
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+@if (!success)
+{
+    <AuthorizeView>
+        <Authorized>
+            <Button Color="Color.Danger">退出登录</Button>
+        </Authorized>
+        <NotAuthorized>
+        @if (errorInfo != null)
+        {
+            <Alert Color="Color.Danger" >@errorInfo</Alert>
+        }   
+        <div class="row mt-3">
+              <BootstrapInput @bind-Value="@username" Placeholder="Username" />
+        </div>
+        <div class="row mt-3">
+                <BootstrapInput @bind-Value="@password" PlaceHolder="Password" type="password" />
+        </div>
+        <div class="row mt-3">
+                <Button Color="Color.Primary" IsAsync="true" OnClick="@OnLogin">登录</Button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+}
+@code {
+    string username="";
+    string password = "";
+    string? errorInfo = null;
+    bool success = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = HttpUtility.ParseQueryString(new Uri( NavigationManager.Uri).Query);
+        errorInfo = query.Get("err");
+        if (errorInfo == null)
+        {
+            var suc = query.Get("suc");
+            if (suc!=null)
+            {
+                success = true;
+                await ToastService.Success(null, "登录成功");
+            }
+        }
+        await base.OnInitializedAsync();
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (success) NavigationManager.NavigateTo("/");
+        base.OnAfterRender(firstRender);
+    }
+    async Task OnLogin(MouseEventArgs args)
+    {
+        var user = await UserManager.FindByEmailAsync(username);
+        if (user ==null)
+        {
+            errorInfo = "未知用户";
+            await ToastService.Error(null, "登录失败: 未知用户");
+            return;
+        }
+        var result = await SignInManager.CheckPasswordSignInAsync(user, password, false);
+        if (result.Succeeded)
+        {
+            errorInfo = null;
+            var key = LoginMiddleware.PreLogin(new LoginInfo { Username = username, Password = password });
+            NavigationManager.NavigateTo($"/Login?key={key}",true);
+        }
+        else
+        {
+            errorInfo = result.ToString();
+            await ToastService.Error(null, "登录失败: "+result.ToString());
+        }
+    }
+}
